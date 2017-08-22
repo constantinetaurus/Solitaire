@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+  <html style="height: 100%; margin: 0px;">            
+    <head>          
+      <meta charset="utf-8">    
+      <title>       
+        moving cards into holders
+      </title>
+
+      <script type="text/javascript">
+
+        function Holder(id){
+          this.id = id;
+          this.arr = new Array(); 
+          this.obj = document.getElementById(id);        
+          this.chX = parseInt(this.obj.style.left) + 25;
+          this.chY = parseInt(this.obj.style.top) + 25;
+
+          return this;
+        }
+
+        function Card(id){
+          this.id = id;         //id
+          this.isMove = false;  //признак движения данного div
+          this.dX = 0;          //смещение координат мыши относительно X
+          this.dY = 0;          //смещение координат мыши относительно Y
+          this.holderIndex = undefined;
+          this.prevX = 0;
+          this.prevY = 0;
+          this.obj = document.getElementById(id);
+          var _self = this; //замыкание
+          _self.obj.style.zIndex = 1;
+          this.isBackSide = false;
+          this.prevZindex = 1;
+
+          this.obj.onmousedown = function(evt)
+                            {
+                              evt   = (evt)?evt:((window.event)?event:null);
+                              if(evt == null) return;
+
+                              if(evt.pageX && evt.pageY)
+                              {
+                                if(_self.holderIndex == undefined)
+                                {
+                                  _self.prevZindex = parseInt(_self.obj.style.zIndex);
+                                  _self.isMove = true;
+                                  _self.obj.style.zIndex = 1000;
+                                  _self.prevX = parseInt(_self.obj.style.left);
+                                  _self.prevY = parseInt(_self.obj.style.top);
+                                  _self.dX = ((evt.x)?evt.x:evt.clientX) - parseInt(_self.obj.style.left);
+                                  _self.dY = ((evt.y)?evt.y:evt.clientY) - parseInt(_self.obj.style.top);
+                                }
+                                else
+                                {  
+                                  movingArray = holders[_self.holderIndex].arr.slice(parseInt(_self.obj.style.zIndex) - 1);
+                                  for(var i = 0; i < movingArray.length; i++)
+                                  {
+                                    movingArray[i].prevZindex = movingArray[i].obj.style.zIndex;
+                                    movingArray[i].obj.style.zIndex = 1000 + parseInt(movingArray[i].obj.style.zIndex);
+                                    movingArray[i].isMove = true;
+                                    movingArray[i].prevX = parseInt(movingArray[i].obj.style.left);
+                                    movingArray[i].prevY = parseInt(movingArray[i].obj.style.top);
+                                    movingArray[i].dX = ((evt.x)?evt.x:evt.clientX) - parseInt(movingArray[i].obj.style.left);
+                                    movingArray[i].dY = ((evt.y)?evt.y:evt.clientY) - parseInt(movingArray[i].obj.style.top);
+                                  }
+                                }
+                              }
+                              else
+                              {                              
+                                //not implemented
+                              }
+                              _self.obj.style.cursor = "default";
+                            }
+
+          this.obj.onmouseup = function(evt)
+                            {
+                              evt   = (evt)?evt:((window.event)?event:null);
+                              if(evt == null) return;
+          
+                              if(evt.pageX && evt.pageY)
+                              {
+                                var prevHolderIndex = _self.holderIndex;
+                                for(var i = 0; i < holders.length; i++)
+                                {
+                                  if( (parseInt(_self.obj.style.left) > parseInt(holders[i].obj.style.left) && 
+                                      parseInt(_self.obj.style.left) < (parseInt(holders[i].obj.style.left) + 150)) && 
+                                      (parseInt(_self.obj.style.top) > parseInt(holders[i].obj.style.top) && 
+                                      parseInt(_self.obj.style.top) < (parseInt(holders[i].obj.style.top) + 400))
+                                    )
+                                    {
+                                      if(_self.holderIndex == undefined)
+                                      {
+                                        _self.isMove = false;
+                                        _self.holderIndex = i;
+                                        _self.obj.style.zIndex = parseInt(holders[i].arr.length + 1);
+                                        _self.obj.style.left = holders[i].chX + 'px';
+                                        _self.obj.style.top = (holders[i].chY + (parseInt(_self.obj.style.zIndex) * 20)) + 'px';
+                                        holders[i].arr.push(_self);  
+                                      }
+                                      else if(_self.holderIndex != i)
+                                      {   
+                                        holders[_self.holderIndex].arr.splice(parseInt(_self.prevZindex) - 1);                           
+                                        for(var j = 0; j < movingArray.length; j++)
+                                        {
+                                          movingArray[j].isMove = false;
+                                          movingArray[j].holderIndex = i;
+                                          movingArray[j].obj.style.zIndex = parseInt(holders[i].arr.length + 1);
+                                          movingArray[j].obj.style.left = holders[i].chX + 'px';
+                                          movingArray[j].obj.style.top = (holders[i].chY + (parseInt(movingArray[j].obj.style.zIndex) * 20)) + 'px';
+                                          holders[i].arr.push(movingArray[j]);
+                                        }                                                                      
+                                        movingArray.length = 0;
+                                      }
+                                      else if(_self.holderIndex == i)
+                                      {
+                                        for(var j = 0; j < movingArray.length; j++)
+                                        {
+                                          movingArray[j].isMove = false;
+                                          movingArray[j].obj.style.zIndex = movingArray[j].prevZindex;
+                                          movingArray[j].obj.style.left = parseInt(movingArray[j].prevX) + 'px';
+                                          movingArray[j].obj.style.top = parseInt(movingArray[j].prevY) + 'px';
+                                        }
+                                        movingArray.length = 0;
+                                      }
+                                    }
+                                }
+
+                                if(_self.holderIndex == undefined)
+                                { 
+                                  _self.isMove = false;
+                                  _self.obj.style.zIndex = _self.prevZindex;
+                                  _self.obj.style.left = _self.prevX + 'px';
+                                  _self.obj.style.top = _self.prevY + 'px';
+                                }
+                                else if(_self.holderIndex == prevHolderIndex && _self.holderIndex != undefined)
+                                {
+                                  for(var j = 0; j < movingArray.length; j++)
+                                  {
+                                    movingArray[j].isMove = false;
+                                    movingArray[j].obj.style.zIndex = movingArray[j].prevZindex;
+                                    movingArray[j].obj.style.left = parseInt(movingArray[j].prevX) + 'px';
+                                    movingArray[j].obj.style.top = parseInt(movingArray[j].prevY) + 'px';
+                                  }
+                                  movingArray.length = 0; 
+                                } 
+                              }
+                              else
+                              {
+                                //not implemented
+                              }
+                            }
+          return this;
+        }
+      </script>
+
+      <style type="text/css"> 
+        .holder
+        {
+          border: 1px solid black;
+          position: absolute;
+        } 
+        .card
+        {
+          position: absolute;
+        }
+      </style>   
+
+    </head>
+
+    <body style="height: 100%; margin: 0px; background-color: #007E00" onmousemove="mouseMove(event); return false /* отмена стандартного обработчика (мы этим говорим что запускаем только наш обработчик а свой ненадо запускать)*/"> 
+
+      <div class="holder" id="H1" style="height: 400px; width: 150px; left: 200px; top: 50px;"></div>
+      <div class="holder" id="H2" style="height: 400px; width: 150px; left: 400px; top: 50px;"></div>
+      <div class="holder" id="H3" style="height: 400px; width: 150px; left: 600px; top: 50px;"></div>
+      <div class="holder" id="H4" style="height: 400px; width: 150px; left: 800px; top: 50px;"></div>
+      
+      <img class="card" id="s10" src="s10.gif"  style="left: 100px; top: 50px;" />
+      <img class="card" id="sJ"  src="sJ.gif" style="left: 100px; top: 50px;" />
+      <img class="card" id="sQ"  src="sQ.gif" style="left: 100px; top: 50px;" />
+      <img class="card" id="sK"  src="sK.gif" style="left: 100px; top: 50px;" />
+      <img class="card" id="hA"  src="hA.gif" style="left: 100px; top: 50px;" />
+      <img class="card" id="h2"  src="h2.gif" style="left: 100px; top: 50px;" />
+      <img class="card" id="h3"  src="h3.gif" style="left: 100px; top: 50px;" />
+      <img class="card" id="h4"  src="h4.gif" style="left: 100px; top: 50px;" />
+      <img class="card" id="h5"  src="h5.gif" style="left: 100px; top: 50px;" />
+      <img class="card" id="h6"  src="h6.gif" style="left: 100px; top: 50px;" />
+
+
+      <script type="text/javascript">
+
+
+        var movingArray = new Array();
+
+
+        var cards = new Array(
+                                new Card('s10'),
+                                new Card('sJ'),
+                                new Card('sQ'),
+                                new Card('sK'),
+                                new Card('hA'),
+                                new Card('h2'),
+                                new Card('h3'),
+                                new Card('h4'),
+                                new Card('h5'),
+                                new Card('h6')
+                              );
+        
+        var holders = new Array(
+                                  new Holder('H1'),
+                                  new Holder('H2'),
+                                  new Holder('H3'),
+                                  new Holder('H4')
+                                );
+
+
+        function mouseMove(evt){
+
+          evt   = (evt)?evt:((window.event)?event:null);
+          if(evt == null) return;
+
+          if(evt.pageX && evt.pageY)
+          {
+            for(var i = 0; i < cards.length; i++)
+            {
+              if(cards[i].isMove)
+              {
+                cards[i].obj.style.left = (evt.pageX - cards[i].dX) + "px";
+                cards[i].obj.style.top = (evt.pageY - cards[i].dY) + "px";
+              }
+            }
+          }
+          else
+          {
+            for(var i = 0; i < cards.length; i++)
+            {
+              if(cards[i].isMove)
+              {
+                cards[i].obj.style.left = (evt.clientX - cards[i].dX) + "px";
+                cards[i].obj.style.top = (evt.clientY - cards[i].dY) + "px";
+              }
+            }
+          }
+        }
+
+      </script>
+      
+    </body> 
+  </html>

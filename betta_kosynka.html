@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+  <html style="height: 100%; margin: 0px;">            
+    <head>          
+      <meta charset="utf-8">    
+      <title>       
+        косынка2
+      </title>
+
+      <script type="text/javascript">
+
+        function Holder(id){
+          this.id = id;
+          this.arr = new Array(); 
+          this.obj = document.getElementById(id);        
+          this.chX = parseInt(this.obj.style.left);
+          this.chY = parseInt(this.obj.style.top) - 20;
+
+          return this;
+        }
+
+        function Container(id,suit){
+          this.id = id;
+          this.arr = new Array(); 
+          this.obj = document.getElementById(id); 
+          this.chX = parseInt(this.obj.style.left);
+          this.chY = parseInt(this.obj.style.top);   
+          this.suit = suit;  
+
+          return this;
+        }
+
+        function Card(id, front){
+          this.id = id;         //id
+          this.isMove = false;  //признак движения данного div
+          this.dX = 0;          //смещение координат мыши относительно X
+          this.dY = 0;          //смещение координат мыши относительно Y
+          this.holderIndex = undefined;
+          this.containerindex = undefined;
+          this.prevX = 0;
+          this.prevY = 0;
+          this.obj = document.getElementById(id);
+          this.obj.setAttribute('src','back.png');
+          this.obj.setAttribute('width','71');
+          this.obj.setAttribute('height','96');
+          var _self = this; //замыкание
+          _self.obj.style.zIndex = 1;
+          this.isBackSide = true;
+          this.srcFront = front;
+          
+          if(front[0] == 's' || front[0] == 'c') this.isBlackSuit = true;
+          else this.isBlackSuit = false;
+          
+          if(front[1] != '1') this.rank = front[1];
+          else this.rank = front[1] + front[2];
+
+          this.suit = front[0];
+          this.prevZindex = 1;
+
+          this.obj.ondblclick = function(evt)
+          {
+            evt   = (evt)?evt:((window.event)?event:null);
+            if(evt == null) return;
+
+            if(evt.pageX && evt.pageY)
+            {
+              if(_self.isBackSide == true) return;
+              if(_self.holderIndex == undefined)
+              {
+                for(var i = 0; i < containers.length; i++)
+                {
+                  if(_self.suit == containers[i].suit)
+                  {
+                    if(containers[i].arr.length == 0)
+                    {
+                      if(_self.rank == 'A')
+                      {
+                        _self.obj.style.left = containers[i].obj.style.left;
+                        _self.obj.style.top = containers[i].obj.style.top;
+                        _self.obj.style.zIndex = containers[i].arr.length + 1;
+                        _self.containerindex = i;
+                        containers[i].arr.push(_self);
+                        deckSuits.arr.pop();
+                      }
+                    }
+                    else
+                    {
+                      var _selfIndex = 0;
+                      var _objIndex = 0;
+                      for(var j = 0; j < cardRanks.length; j++)
+                      {
+                        if(_self.rank == cardRanks[j])
+                          _selfIndex = j;
+                        if(containers[i].arr[containers[i].arr.length - 1].rank == cardRanks[j])
+                          _objIndex = j;
+                      }
+                      if(_selfIndex == _objIndex - 1)
+                      {
+                        _self.obj.style.left = containers[i].obj.style.left;
+                        _self.obj.style.top = containers[i].obj.style.top;
+                        _self.obj.style.zIndex = containers[i].arr.length + 1;
+                        _self.containerindex = i;
+                        containers[i].arr.push(_self);
+                        deckSuits.arr.pop();
+                      }
+                    }
+                  }
+                }
+              }
+              else if(_self.holderIndex != undefined)
+              {
+                if(parseInt(_self.obj.style.zIndex) == holders[_self.holderIndex].arr.length)
+                {
+                  for(var i = 0; i < containers.length; i++)
+                  {
+                    if(_self.suit == containers[i].suit)
+                    {
+                      if(containers[i].arr.length == 0)
+                      {
+                        if(_self.rank == 'A')
+                        {
+                          _self.obj.style.left = containers[i].obj.style.left;
+                          _self.obj.style.top = containers[i].obj.style.top;
+                          _self.obj.style.zIndex = containers[i].arr.length + 1;
+                          _self.containerindex = i;
+                          containers[i].arr.push(_self);
+                          holders[_self.holderIndex].arr.pop();
+                          if(holders[_self.holderIndex].arr.length != 0)
+                          {
+                            holders[_self.holderIndex].arr[holders[_self.holderIndex].arr.length - 1].isBackSide = false;
+                            holders[_self.holderIndex].arr[holders[_self.holderIndex].arr.length - 1].obj.setAttribute('src', holders[_self.holderIndex].arr[holders[_self.holderIndex].arr.length - 1].srcFront);
+                          }
+                          _self.holderIndex = undefined;
+                        }
+                      }
+                      else
+                      {
+                        var _selfIndex = 0;
+                        var _objIndex = 0;
+                        for(var j = 0; j < cardRanks.length; j++)
+                        {
+                          if(_self.rank == cardRanks[j])
+                            _selfIndex = j;
+                          if(containers[i].arr[containers[i].arr.length - 1].rank == cardRanks[j])
+                            _objIndex = j;
+                        }
+                        if(_selfIndex == _objIndex - 1)
+                        {
+                          _self.obj.style.left = containers[i].obj.style.left;
+                          _self.obj.style.top = containers[i].obj.style.top;
+                          _self.obj.style.zIndex = containers[i].arr.length + 1;
+                          _self.containerindex = i;
+                          containers[i].arr.push(_self);
+                          holders[_self.holderIndex].arr.pop();
+                          if(holders[_self.holderIndex].arr.length != 0)
+                          {
+                            holders[_self.holderIndex].arr[holders[_self.holderIndex].arr.length - 1].isBackSide = false;
+                            holders[_self.holderIndex].arr[holders[_self.holderIndex].arr.length - 1].obj.setAttribute('src', holders[_self.holderIndex].arr[holders[_self.holderIndex].arr.length - 1].srcFront);
+                          }
+                          _self.holderIndex = undefined;
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+              checkContainers();
+            }
+            else
+            {
+              //not implemented
+            }
+          }
+
+          this.obj.onmousedown = function(evt)
+                            {
+                              evt   = (evt)?evt:((window.event)?event:null);
+                              if(evt == null) return;
+
+                              if(evt.pageX && evt.pageY)
+                              {
+                                if(_self.isBackSide == true)
+                                {
+                                  return;
+                                }
+                                if(_self.holderIndex == undefined)
+                                {
+                                  _self.prevZindex = parseInt(_self.obj.style.zIndex);
+                                  _self.isMove = true;
+                                  _self.obj.style.zIndex = 1000;
+                                  _self.prevX = parseInt(_self.obj.style.left);
+                                  _self.prevY = parseInt(_self.obj.style.top);
+                                  _self.dX = ((evt.x)?evt.x:evt.clientX) - parseInt(_self.obj.style.left);
+                                  _self.dY = ((evt.y)?evt.y:evt.clientY) - parseInt(_self.obj.style.top);
+                                }
+                                else
+                                {  
+                                  movingArray = holders[_self.holderIndex].arr.slice(parseInt(_self.obj.style.zIndex) - 1);
+                                  for(var i = 0; i < movingArray.length; i++)
+                                  {
+                                    movingArray[i].prevZindex = movingArray[i].obj.style.zIndex;
+                                    movingArray[i].obj.style.zIndex = 1000 + parseInt(movingArray[i].obj.style.zIndex);
+                                    movingArray[i].isMove = true;
+                                    movingArray[i].prevX = parseInt(movingArray[i].obj.style.left);
+                                    movingArray[i].prevY = parseInt(movingArray[i].obj.style.top);
+                                    movingArray[i].dX = ((evt.x)?evt.x:evt.clientX) - parseInt(movingArray[i].obj.style.left);
+                                    movingArray[i].dY = ((evt.y)?evt.y:evt.clientY) - parseInt(movingArray[i].obj.style.top);
+                                  }
+                                }
+                              }
+                              else
+                              {                              
+                                //not implemented
+                              }
+                              _self.obj.style.cursor = "default";
+                            }
+
+          this.obj.onmouseup = function(evt)
+                            {
+                              evt   = (evt)?evt:((window.event)?event:null);
+                              if(evt == null) return;
+          
+                              if(evt.pageX && evt.pageY)
+                              {
+                                if(_self.isBackSide == true && _self.holderIndex == undefined)
+                                {
+                                  _self.obj.setAttribute('src',_self.srcFront);
+                                  _self.isBackSide = false;
+                                  _self.obj.style.left = '450px';
+                                  _self.obj.style.zIndex = (deckSuits.arr.length + 1);
+                                  deckSuits.arr.push(_self);
+                                  mainDeck.arr.pop();
+                                  checkContainers();
+                                  return;
+                                }
+
+                                for(var i = 0; i < containers.length; i++)
+                                {
+                                  if( (parseInt(_self.obj.style.left) > parseInt(containers[i].obj.style.left) && 
+                                      parseInt(_self.obj.style.left) < (parseInt(containers[i].obj.style.left) + 71)) && 
+                                      (parseInt(_self.obj.style.top) > parseInt(containers[i].obj.style.top) && 
+                                      parseInt(_self.obj.style.top) < (parseInt(containers[i].obj.style.top) + 96))
+                                    )
+                                  {
+                                    if(_self.holderIndex == undefined)
+                                    { 
+                                      if(_self.suit == containers[i].suit)
+                                      {
+                                        if(containers[i].arr.length == 0)
+                                        {
+                                          if(_self.rank == 'A')
+                                          {
+                                            _self.isMove = false;
+                                            _self.obj.style.left = containers[i].chX + 'px';
+                                            _self.obj.style.top = containers[i].chY + 'px';
+                                            _self.obj.style.zIndex = containers[i].arr.length + 1;
+                                            _self.containerindex = i;
+                                            containers[i].arr.push(_self);
+                                            deckSuits.arr.pop();
+                                            checkContainers();
+                                            return;
+                                          }
+                                        }
+                                        else
+                                        {
+                                          var _selfIndex = 0;
+                                          var _objIndex = 0;
+                                          for(var j = 0; j < cardRanks.length; j++)
+                                          {
+                                            if(_self.rank == cardRanks[j])
+                                              _selfIndex = j;
+                                            if(containers[i].arr[containers[i].arr.length - 1].rank == cardRanks[j])
+                                              _objIndex = j;
+                                          }
+                                          if(_selfIndex == _objIndex - 1)
+                                          {
+                                            _self.isMove = false;
+                                            _self.obj.style.left = containers[i].chX + 'px';
+                                            _self.obj.style.top = containers[i].chY + 'px';
+                                            _self.obj.style.zIndex = containers[i].arr.length + 1;
+                                            _self.containerindex = i;
+                                            containers[i].arr.push(_self);
+                                            deckSuits.arr.pop();
+                                            checkContainers();
+                                            return;
+                                          }
+                                        }
+                                      }
+                                    }
+                                    else if(_self.holderIndex != undefined)
+                                    { 
+                                      if(_self.suit == containers[i].suit)
+                                      {
+                                        if(containers[i].arr.length == 0)
+                                        {
+                                          if(_self.rank == 'A')
+                                          {
+                                            _self.isMove = false;
+                                            _self.obj.style.left = containers[i].chX + 'px';
+                                            _self.obj.style.top = containers[i].chY + 'px';
+                                            _self.obj.style.zIndex = containers[i].arr.length + 1;
+                                            _self.containerindex = i;
+                                            containers[i].arr.push(_self);
+                                            holders[_self.holderIndex].arr.pop();
+                                            if(holders[_self.holderIndex].arr.length != 0)
+                                            {
+                                              holders[_self.holderIndex].arr[holders[_self.holderIndex].arr.length - 1].isBackSide = false;
+                                              holders[_self.holderIndex].arr[holders[_self.holderIndex].arr.length - 1].obj.setAttribute('src', holders[_self.holderIndex].arr[holders[_self.holderIndex].arr.length - 1].srcFront);
+                                            }
+                                            _self.holderIndex = undefined;
+                                            checkContainers();
+                                            return;
+                                          }
+                                        }
+                                        else
+                                        {
+                                          var _selfIndex = 0;
+                                          var _objIndex = 0;
+                                          for(var j = 0; j < cardRanks.length; j++)
+                                          {
+                                            if(_self.rank == cardRanks[j])
+                                              _selfIndex = j;
+                                            if(containers[i].arr[containers[i].arr.length - 1].rank == cardRanks[j])
+                                              _objIndex = j;
+                                          }
+                                          if(_selfIndex == _objIndex - 1)
+                                          {
+                                            _self.isMove = false;
+                                            _self.obj.style.left = containers[i].chX + 'px';
+                                            _self.obj.style.top = containers[i].chY + 'px';
+                                            _self.obj.style.zIndex = containers[i].arr.length + 1;
+                                            _self.containerindex = i;
+                                            containers[i].arr.push(_self);
+                                            holders[_self.holderIndex].arr.pop();
+                                            if(holders[_self.holderIndex].arr.length != 0)
+                                            {
+                                              holders[_self.holderIndex].arr[holders[_self.holderIndex].arr.length - 1].isBackSide = false;
+                                              holders[_self.holderIndex].arr[holders[_self.holderIndex].arr.length - 1].obj.setAttribute('src', holders[_self.holderIndex].arr[holders[_self.holderIndex].arr.length - 1].srcFront);
+                                            }
+                                            _self.holderIndex = undefined;
+                                            checkContainers();
+                                            return;
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+
+                                var prevHolderIndex = _self.holderIndex;
+                                for(var i = 0; i < holders.length; i++)
+                                {
+                                  if( (parseInt(_self.obj.style.left) > parseInt(holders[i].obj.style.left) && 
+                                      parseInt(_self.obj.style.left) < (parseInt(holders[i].obj.style.left) + 71)) && 
+                                      (parseInt(_self.obj.style.top) > parseInt(holders[i].obj.style.top) && 
+                                      parseInt(_self.obj.style.top) < (parseInt(holders[i].obj.style.top) + 400))
+                                    )
+                                    {
+                                      var index1 = 0;
+                                      var index2 = 0;
+                                      if(_self.holderIndex == undefined)
+                                      {
+                                        if(holders[i].arr.length == 0 && _self.rank != 'K') break;
+                                        else if(holders[i].arr.length == 0 && _self.rank == 'K')
+                                        {
+                                          _self.isMove = false;
+                                          _self.holderIndex = i;
+                                          _self.obj.style.zIndex = parseInt(holders[i].arr.length + 1);
+                                          _self.obj.style.left = holders[i].chX + 'px';
+                                          _self.obj.style.top = (holders[i].chY + (parseInt(_self.obj.style.zIndex) * 20)) + 'px';
+                                          holders[i].arr.push(_self); 
+                                          deckSuits.arr.pop();
+                                          break;
+                                        }
+                                        var tmp1 = _self.rank;
+                                        var tmp2 = holders[i].arr[holders[i].arr.length - 1].rank;
+                                        for(var k = 0; k < cardRanks.length; k++)
+                                        {
+                                          if(cardRanks[k] == tmp1)
+                                            index1 = k;
+                                          if(cardRanks[k] == tmp2)
+                                            index2 = k;
+                                        }
+                                        if(_self.isBlackSuit != holders[i].arr[holders[i].arr.length - 1].isBlackSuit && index2 == index1 - 1)
+                                        {
+                                          _self.isMove = false;
+                                          _self.holderIndex = i;
+                                          _self.obj.style.zIndex = parseInt(holders[i].arr.length + 1);
+                                          _self.obj.style.left = holders[i].chX + 'px';
+                                          _self.obj.style.top = (holders[i].chY + (parseInt(_self.obj.style.zIndex) * 20)) + 'px';
+                                          if(_self.containerindex != undefined)
+                                          {
+
+                                            containers[_self.containerindex].arr.pop();
+                                            _self.containerindex = undefined;
+                                          }
+                                          else
+                                          {
+                                            deckSuits.arr.pop();
+                                          }
+                                          holders[i].arr.push(_self); 
+                                          break;
+                                        }
+                                      }
+                                      else if(_self.holderIndex != i)
+                                      {   
+                                        if(holders[i].arr.length == 0 && _self.rank != 'K') break;
+                                        else if(holders[i].arr.length == 0 && _self.rank == 'K')
+                                        {
+                                          holders[_self.holderIndex].arr.splice(parseInt(_self.prevZindex) - 1);                           
+                                          for(var j = 0; j < movingArray.length; j++)
+                                          {
+                                            movingArray[j].isMove = false;
+                                            movingArray[j].holderIndex = i;
+                                            movingArray[j].obj.style.zIndex = parseInt(holders[i].arr.length + 1);
+                                            movingArray[j].obj.style.left = holders[i].chX + 'px';
+                                            movingArray[j].obj.style.top = (holders[i].chY + (parseInt(movingArray[j].obj.style.zIndex) * 20)) + 'px';
+                                            holders[i].arr.push(movingArray[j]);
+                                          }                                                                      
+                                          movingArray.length = 0;
+                                          break;
+                                        }
+                                        var tmp1 = _self.rank;
+                                        var tmp2 = holders[i].arr[holders[i].arr.length - 1].rank;
+                                        for(var k = 0; k < cardRanks.length; k++)
+                                        {
+                                          if(cardRanks[k] == tmp1)
+                                            index1 = k;
+                                          if(cardRanks[k] == tmp2)
+                                            index2 = k;
+                                        }                                       
+                                        if(_self.isBlackSuit != holders[i].arr[holders[i].arr.length - 1].isBlackSuit && index2 == index1 - 1)
+                                        {
+                                          holders[_self.holderIndex].arr.splice(parseInt(_self.prevZindex) - 1);                           
+                                          for(var j = 0; j < movingArray.length; j++)
+                                          {
+                                            movingArray[j].isMove = false;
+                                            movingArray[j].holderIndex = i;
+                                            movingArray[j].obj.style.zIndex = parseInt(holders[i].arr.length + 1);
+                                            movingArray[j].obj.style.left = holders[i].chX + 'px';
+                                            movingArray[j].obj.style.top = (holders[i].chY + (parseInt(movingArray[j].obj.style.zIndex) * 20)) + 'px';
+                                            holders[i].arr.push(movingArray[j]);
+                                          }                                                                      
+                                          movingArray.length = 0;
+                                          break;
+                                        }
+                                        else if(holders[i].arr[holders[i].arr.length - 1] == 0 && _self.rank == "K")
+                                        {
+                                          holders[_self.holderIndex].arr.splice(parseInt(_self.prevZindex) - 1);                           
+                                          for(var j = 0; j < movingArray.length; j++)
+                                          {
+                                            movingArray[j].isMove = false;
+                                            movingArray[j].holderIndex = i;
+                                            movingArray[j].obj.style.zIndex = parseInt(holders[i].arr.length + 1);
+                                            movingArray[j].obj.style.left = holders[i].chX + 'px';
+                                            movingArray[j].obj.style.top = (holders[i].chY + (parseInt(movingArray[j].obj.style.zIndex) * 20)) + 'px';
+                                            holders[i].arr.push(movingArray[j]);
+                                          }                                                                      
+                                          movingArray.length = 0;
+                                          break;
+                                        }
+                                      }
+                                      else if(_self.holderIndex == i)
+                                      {
+                                        for(var j = 0; j < movingArray.length; j++)
+                                        {
+                                          movingArray[j].isMove = false;
+                                          movingArray[j].obj.style.zIndex = movingArray[j].prevZindex;
+                                          movingArray[j].obj.style.left = parseInt(movingArray[j].prevX) + 'px';
+                                          movingArray[j].obj.style.top = parseInt(movingArray[j].prevY) + 'px';
+                                        }
+                                        movingArray.length = 0;
+                                        break;
+                                      }
+                                    }
+                                }
+                                if(_self.holderIndex == undefined)
+                                { 
+                                  _self.isMove = false;
+                                  _self.obj.style.zIndex = _self.prevZindex;
+                                  _self.obj.style.left = _self.prevX + 'px';
+                                  _self.obj.style.top = _self.prevY + 'px';                                
+                                }
+                                else if(_self.holderIndex == prevHolderIndex && _self.holderIndex != undefined)
+                                {
+                                  for(var j = 0; j < movingArray.length; j++)
+                                  {
+                                    movingArray[j].isMove = false;
+                                    movingArray[j].obj.style.zIndex = movingArray[j].prevZindex;
+                                    movingArray[j].obj.style.left = parseInt(movingArray[j].prevX) + 'px';
+                                    movingArray[j].obj.style.top = parseInt(movingArray[j].prevY) + 'px';
+                                  }
+                                  movingArray.length = 0; 
+                                } 
+                                for(var i = 0; i < holders.length; i++)
+                                {
+                                  if(holders[i].arr.length == 0) continue;
+                                  var length = holders[i].arr.length - 1;
+                                  if(holders[i].arr[length].isBackSide == true)
+                                  {
+                                    holders[i].arr[length].isBackSide = false;
+                                    holders[i].arr[length].obj.setAttribute('src', holders[i].arr[length].srcFront);
+                                  }
+                                }
+                                checkContainers();
+                              }
+                              else
+                              {
+                                //not implemented
+                              }
+                            }
+          return this;
+        }
+
+        function checkContainers()
+        {
+          var tmp = 0;
+          for(var i = 0; i < containers.length; i++)
+          {
+            tmp += containers[i].arr.length;
+          }
+          if(tmp == 52)
+          {
+            alert('VIKTORY');
+          }
+        }
+
+        function getRandomInt(min, max) {
+          return Math.floor(Math.random() * (max - min + 1)) + min;
+        } 
+
+        function reShuffle(evt)
+        {
+          mainDeck.arr.length = 0;
+          do
+          {
+            var elem = deckSuits.arr.pop();                      
+            elem.isBackSide = true;
+            elem.obj.setAttribute('src','back.png');
+            elem.obj.style.left = '350px';
+            elem.obj.style.top = '100px';
+            elem.obj.style.zIndex = mainDeck.arr.length + 1;
+            mainDeck.arr.push(elem);
+          }while(deckSuits.arr.length != 0);
+          var k = 0;
+          for(var i = 0; i < mainDeck.arr.length; i++)
+          {
+            if(i % 5 == 0)
+            {
+              k+=2;
+            }
+            mainDeck.arr[i].obj.style.left = (350 + k) + 'px';
+            mainDeck.arr[i].obj.style.top = '100px';
+          }
+        }
+
+        function shuffleDeck(evt)
+        {
+          movingArray.length = 0;
+          cards.length = 0;
+          for(var k = 0; k < holders.length; k++) holders[k].arr.length = 0;
+          for(var k = 0; k < containers.length; k++) containers[k].arr.length = 0;
+          mainDeck.arr.length = 0;
+          deckSuits.arr.length = 0;
+
+          for(var i = 1; i < 53; i++)
+          {
+            do
+            {
+              var value = cardSuits[getRandomInt(0,3)] + cardRanks[getRandomInt(0,12)];
+              if(!contains(value))
+              {
+                var card = new Card('c' + i, value + '.GIF');
+                cards.push(card);
+                break;
+              }
+            }while(true);
+          }
+          var cnt = 0;
+          for(var i = 0; i < holders.length; i++)
+          {
+            for(var j = 0; j < i + 1; j++)
+            {
+              cards[cnt].holderIndex = i;
+              cards[cnt].obj.style.zIndex = parseInt(holders[i].arr.length + 1);
+              cards[cnt].obj.style.left = holders[i].chX + 'px';
+              cards[cnt].obj.style.top = (holders[i].chY + (parseInt(cards[cnt].obj.style.zIndex) * 20)) + 'px';
+              holders[i].arr.push(cards[cnt]);
+              cnt++;
+              if(j == i)
+              {
+                holders[i].arr[j].obj.setAttribute('src', holders[i].arr[j].srcFront);
+                holders[i].arr[j].isBackSide = false;
+              }
+            }
+          }
+          var k = 0;
+          for(var i = cnt; i < cards.length; i++)
+          {
+            if(i % 5 == 0)
+            {
+              k+=2;
+            }
+            cards[i].obj.style.left = (350 + k) + 'px';
+            cards[i].obj.style.top = '100px';
+            mainDeck.arr.push(cards[i]);
+          }
+        }
+
+        function contains(value)
+        {
+          for(var i = 0; i < cards.length; i++)
+          {
+            if(cards[i].srcFront == (value + '.GIF'))
+            {
+              return true;
+            }
+          }
+          return false;
+        }
+
+      </script>
+
+      <style type="text/css"> 
+        .holder
+        {
+          border: 1px solid black;
+          border-radius: 5px;
+          position: absolute;
+          background-color: #05360C;
+        } 
+        #container1,#container2,#container3,#container4,#mainDeck,#deckSuits
+        {
+          background-color: #066A1A;
+        }
+        .card
+        {
+          position: absolute;
+          top: 100px;
+          left: 350px;
+          border: 1px solid white;
+          border-radius: 5px;
+        }
+        .card:hover
+        {
+          border: 1px ridge black;
+        }
+        .btn 
+        {
+          display: inline-block;
+          padding: 15px 25px;
+          font-size: 24px;
+          cursor: pointer;
+          text-align: center;
+          text-decoration: none;
+          outline: none;
+          color: #fff;
+          background-color: #4CAF50;
+          border: none;
+          border-radius: 15px;
+          position: relative;
+          top: 25px;
+          left: 450px;
+        }
+        .btn:hover 
+        {
+          background-color: #3e8e41;
+        }
+      </style>   
+
+    </head>
+
+    <body style="height: 100%; margin: 0px; background-color: #066A1A;" onmousemove="mouseMove(event); return false /* отмена стандартного обработчика (мы этим говорим что запускаем только наш обработчик а свой ненадо запускать)*/"> 
+
+      <input class="btn" type="button" value="Начать новую игру" onclick="shuffleDeck(event); return false">
+      <input class="btn" type="button" value="Начать заново">
+
+      <div class="holder" id="mainDeck" style="height: 96px; width: 71px; left: 350px; top: 100px; background-image: url('shuffle.png');" onclick="reShuffle(event);return false"></div>
+      <div class="holder" id="deckSuits" style="height: 96px; width: 71px; left: 450px; top: 100px;"></div>
+
+      <div class="holder" id="container1" style="height: 96px; width: 71px; left: 650px; top: 100px; background-image: url('clubs.png');"></div>
+      <div class="holder" id="container2" style="height: 96px; width: 71px; left: 750px; top: 100px; background-image: url('hearts.png');"></div>
+      <div class="holder" id="container3" style="height: 96px; width: 71px; left: 850px; top: 100px; background-image: url('spades.png');"></div>
+      <div class="holder" id="container4" style="height: 96px; width: 71px; left: 950px; top: 100px; background-image: url('diamonds.png');"></div>
+
+      <div class="holder" id="H1" style="height: 96px; width: 71px; left: 350px; top: 300px;"></div>
+      <div class="holder" id="H2" style="height: 96px; width: 71px; left: 450px; top: 300px;"></div>
+      <div class="holder" id="H3" style="height: 96px; width: 71px; left: 550px; top: 300px;"></div>
+      <div class="holder" id="H4" style="height: 96px; width: 71px; left: 650px; top: 300px;"></div>
+      <div class="holder" id="H5" style="height: 96px; width: 71px; left: 750px; top: 300px;"></div>
+      <div class="holder" id="H6" style="height: 96px; width: 71px; left: 850px; top: 300px;"></div>
+      <div class="holder" id="H7" style="height: 96px; width: 71px; left: 950px; top: 300px;"></div>
+
+      <img class="card" id="c1" src="" />
+      <img class="card" id="c2" src="" />
+      <img class="card" id="c3" src="" />
+      <img class="card" id="c4" src="" />
+      <img class="card" id="c5" src="" />
+      <img class="card" id="c6" src="" />
+      <img class="card" id="c7" src="" />
+      <img class="card" id="c8" src="" />
+      <img class="card" id="c9" src="" />
+      <img class="card" id="c10" src="" />
+      <img class="card" id="c11" src="" />
+      <img class="card" id="c12" src="" />
+      <img class="card" id="c13" src="" />
+      <img class="card" id="c14" src="" />
+      <img class="card" id="c15" src="" />
+      <img class="card" id="c16" src="" />
+      <img class="card" id="c17" src="" />
+      <img class="card" id="c18" src="" />
+      <img class="card" id="c19" src="" />
+      <img class="card" id="c20" src="" />
+      <img class="card" id="c21" src="" />
+      <img class="card" id="c22" src="" />
+      <img class="card" id="c23" src="" />
+      <img class="card" id="c24" src="" />
+      <img class="card" id="c25" src="" />
+      <img class="card" id="c26" src="" />
+      <img class="card" id="c27" src="" />
+      <img class="card" id="c28" src="" />
+      <img class="card" id="c29" src="" />
+      <img class="card" id="c30" src="" />
+      <img class="card" id="c31" src="" />
+      <img class="card" id="c32" src="" />
+      <img class="card" id="c33" src="" />
+      <img class="card" id="c34" src="" />
+      <img class="card" id="c35" src="" />
+      <img class="card" id="c36" src="" />
+      <img class="card" id="c37" src="" />
+      <img class="card" id="c38" src="" />
+      <img class="card" id="c39" src="" />
+      <img class="card" id="c40" src="" />
+      <img class="card" id="c41" src="" />
+      <img class="card" id="c42" src="" />
+      <img class="card" id="c43" src="" />
+      <img class="card" id="c44" src="" />
+      <img class="card" id="c45" src="" />
+      <img class="card" id="c46" src="" />
+      <img class="card" id="c47" src="" />
+      <img class="card" id="c48" src="" />
+      <img class="card" id="c49" src="" />
+      <img class="card" id="c50" src="" />
+      <img class="card" id="c51" src="" />
+      <img class="card" id="c52" src="" />
+    
+
+      <script type="text/javascript">
+        //////////////////////////////////////////////////////////////////////////////////
+        var cardSuits = new Array('s','h','d','c');///////////////////////////////////////
+        var cardRanks = new Array('K','Q','J','10','9','8','7','6','5','4','3','2','A');//
+        //////////////////////////////////////////////////////////////////////////////////
+
+        var movingArray = new Array();
+        var cards = new Array();
+
+        var holders = new Array(
+                                  new Holder('H1'),
+                                  new Holder('H2'),
+                                  new Holder('H3'),
+                                  new Holder('H4'),
+                                  new Holder('H5'),
+                                  new Holder('H6'),
+                                  new Holder('H7')
+                                );
+
+        var containers = new Array(
+                                    new Container('container1', 'c'),
+                                    new Container('container2', 'h'),
+                                    new Container('container3', 's'),
+                                    new Container('container4', 'd')
+                                  );
+
+        var mainDeck = new Holder('mainDeck');
+        var deckSuits = new Holder('deckSuits');
+
+        function mouseMove(evt)
+        {
+          evt   = (evt)?evt:((window.event)?event:null);
+          if(evt == null) return;
+
+          if(evt.pageX && evt.pageY)
+          {
+            for(var i = 0; i < cards.length; i++)
+            {
+              if(cards[i].isMove)
+              {
+                cards[i].obj.style.left = (evt.pageX - cards[i].dX) + "px";
+                cards[i].obj.style.top = (evt.pageY - cards[i].dY) + "px";
+              }
+            }
+          }
+          else
+          {
+            for(var i = 0; i < cards.length; i++)
+            {
+              if(cards[i].isMove)
+              {
+                cards[i].obj.style.left = (evt.clientX - cards[i].dX) + "px";
+                cards[i].obj.style.top = (evt.clientY - cards[i].dY) + "px";
+              }
+            }
+          }
+        }
+
+      </script>
+      
+    </body> 
+  </html>
